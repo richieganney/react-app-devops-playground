@@ -200,7 +200,7 @@ All of the plugins for this playground have been pre-installed on your Jenkins s
     - Name: **nodejs**
     - Install automatically: (box checked)
     - Version: (leave as default)
-    - Global npm packages to install: **npm install**
+    - Global npm packages to install: **leave it blank**
     - Global npm packages refresh hours: **72**
 - Click **Apply**
 
@@ -316,7 +316,6 @@ pipeline {
                     zip -r $UNIQUE_ANIMAL_IDENTIFIER-build-artifacts.zip build/
                     aws s3 cp $UNIQUE_ANIMAL_IDENTIFIER-build-artifacts.zip s3://dpg-november-artifact-bucket
                     cd terraform
-                    rm -rf .terraform
                     terraform init -backend-config="key=${UNIQUE_ANIMAL_IDENTIFIER}.tfstate"
                     terraform apply --auto-approve
                     """
@@ -367,7 +366,6 @@ For the "Build" and "Test" stages, we simply execute an `npm` command that will 
 However for the "Deploy" stage we execute some terraform commands which do the following:
 - `zip -r $UNIQUE_ANIMAL_IDENTIFIER-build-artifacts.zip build/`: compresses the build package and gets it ready to ship to the artifacts S3 bucket.
 - `aws s3 cp $UNIQUE_ANIMAL_IDENTIFIER-build-artifacts.zip s3://dpg-november-artifact-bucket`: copies the zipped up build package and sends it to the artifact bucket. Terraform will be able to then pull this down and unzip it for the deployment
-- `rm -rf .terraform`: removes any local state files if there are any located in the directory.
 - `terraform init -backend-config="key=${UNIQUE_ANIMAL_IDENTIFIER}.tfstate`: this initializes terraform and tells terraform that we want to hold the [state](https://www.terraform.io/docs/state/index.html) in your uniqe state file.
 - `terraform apply --auto-approve`: this will apply the infrastructure that we have defined in the `terraform/` directory of this repository.
 
@@ -448,7 +446,7 @@ It should be a couple of minutes until the website is live. While we wait, lets 
 1. A build folder is created which packages up our application.
 2. We zip up that folder and send it off to Amazon S3.
 3. When the infrastructure is provisioned, the deployed servers will pull down that build zip file and unzip it.
-4. The build package is ultimately served on port 80 (http://), which allows the public to visit and use the website
+4. The build package is ultimately served on port 80 (http://), which allows the public to visit and use the website.
 
 #### Our infrastructure
 - **load balancer**: this will distribute traffic across our servers depending on the health and utilisation of those servers. If one is in poor health, it will redirect traffic to a healthy one.
