@@ -13,21 +13,55 @@ Still with me? Ok, lets get to it...
 
 # Initial setup
 
+## GitHub
+
 If you don't already have a GitHub account then please sign up [here](https://github.com/join?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F&source=header-home).
 
 We will be using one repository for this playground:
-1. The [react-app-devops-playground](https://github.com/richieganney/react-app-devops-playground) repository. This is the repository you're currently in, and it contains all the application code and scripts that we will need to actually deploy the web app to AWS.
+1. The [react-app-devops-playground](https://github.com/DevOpsPlayground/Hands-on-with-Jenkins-Terraform-and-AWS) repository. This is the repository you're currently in, and it contains all the application code and scripts that we will need to actually deploy the web app to AWS.
 
-You will also have a Jenkins server that the playground team have spun up for you this evening...(instructions on how to reach their server)
+You will also have a Jenkins server that the playground team have spun up for you this evening...
+
+## Terminal and VS Code
+
+If you are using our provided workstations tonight, visit [this site](https://digital-meetup-signed-users.s3-eu-west-1.amazonaws.com/index.html) and type your **Meetup username** into the form. Then press submit and you should see
+1. **Username**
+2. **Password**
+3. **Terminal**: this is terminal we have spun up for you to run commands
+4. **IDE**: a workstation with VS Code installed to edit files
+5. **Jenkins**: the Jenkins instance you'll be using tonight
+
+![](readme_images/instance_details.png)
+
+> IMPORTANT: You'll need a unique animal identifier for tonight. You can find this prefixed on your **Terminal** and **IDE** urls. For example in the example above, my animal name would be **bengal**
+
+Keep this animal safe somewhere on your machine.
+
+Once you have logged into your *remote* terminal (the one we have provided), you will need to change into the `WorkDir` directory by running:
+```
+cd WorkDir
+```
+Anything in this directory will show up on your VS Code workstation.
 
 # Section 1 - the first script: build the Pipeline as Code script.
 
 First and foremost, you all need your own forked repository so you all have your own individual repos you can commit to.
 
 ### 1. Fork the repository
-Go to the [react-app-devops-playground](https://github.com/richieganney/react-app-devops-playground) and click `fork`
+Go to the [react-app-devops-playground](https://github.com/DevOpsPlayground/Hands-on-with-Jenkins-Terraform-and-AWS) and click `fork`
 
 ![](readme_images/fork.png)
+
+You can copy the url of the repository from the GitHub user interface like so:
+![](readme_images/copy_url.png)
+
+Pull down your **forked** [react-app-devops-playground](https://github.com/DevOpsPlayground/Hands-on-with-Jenkins-Terraform-and-AWS) repository and cd into it. In your terminal, run:
+```
+git clone <FORKED_REPOSITORY>
+cd <FORKED_REPOSITORY>
+```
+
+Replace `<FORKED_REPOSITORY>` with your forked repository url
 
 Navigate to the forked repository and click in the `jobs` folder. You should see an empty file called `DeployReactApp.groovy`
 
@@ -111,20 +145,21 @@ the `parameters {}` block allows us to define any parameters we want our pipelin
 
 Here we are using the `definition {}` block to specify the Git repository. You will notice two variables that we will be passing into the seed job when we build it:
 
-- `GIT_USER`: this will be the credentials to your personal GitHub account so Jenkins can pull down the repo (don't worry, we haven't configured this yet).
-- `GIT_URL`: this is the url of your forked [react-app-devops-playground](https://github.com/richieganney/react-app-devops-playground) repository.
+- `GIT_USER`: this will be the credentials to your personal GitHub account so Jenkins can clone the repo (don't worry, we haven't configured this yet).
+- `GIT_URL`: this is the url of your forked [react-app-devops-playground](https://github.com/DevOpsPlayground/Hands-on-with-Jenkins-Terraform-and-AWS) repository.
 
 The `scriptPath('')` function defines the file path to the pipeline script that will be used to deploy our application. We'll come back onto this in Section 3
 
 # How to commit and push to master?
 
-1. If you haven't already done so, pull down your **forked** [react-app-devops-playground](https://github.com/richieganney/react-app-devops-playground) repository and cd into it. In your terminal, run:
+1. If you haven't already done so, clone down your **forked** [react-app-devops-playground](https://github.com/DevOpsPlayground/Hands-on-with-Jenkins-Terraform-and-AWS) repository and cd into it. 
+> note: remember to cd into `WorkDir` first if you are using the terminal we provided for you
+
+Now run:
 ```
-git pull <FORKED_REPOSITORY>
+git clone <FORKED_REPOSITORY>
 cd <FORKED_REPOSITORY>
 ```
-Replace `<FORKED_REPOSITORY>` with your forked repository. You can copy the url of the repository from the GitHub user interface like so:
-![](readme_images/copy_url.png)
 
 2. Open the repository in your text editor (I'm using VS Code) and click on the `DeployReactApp.groovy` script.
 ![](readme_images/jenkins_dsl.png)
@@ -132,27 +167,23 @@ Replace `<FORKED_REPOSITORY>` with your forked repository. You can copy the url 
 3. Copy the entire script and paste it into the file. Make sure the `defaultValue` of `UNIQUE_ANIMAL_IDENTIFIER` has been changed.
 ![](readme_images/pasted_jenkins_dsl.png)
 
-4. Add the file to git, commit it and push it to the master branch. In your terminal, in the root directory of the repository, run the following commands:
+4. Before we commit, we just need to do some git configuration:
+
+If you are using provided workstations you will need to configure git by typing:
 
 ```
-git add .
-git commit -m "Populating the Jenkins seed job script"
-git push -u origin master
+git config --global user.name "Your Name"
+git config --global user.email "youremail@domain.com"
 ```
+> Note: You do not need to provide your real name or email
 
-Now let's move onto section 2...
+If you are using provided workstations you will need to authenticate to push. We advise you to use GitHub access token.
 
-# Section 2: Configure Jenkins and then build the seed job.
+When the command line prompts you for your password, you can just paste your access token instead of your password and it will authenticate you:
 
-In this section we will:
-- Add our GitHub credentials to Jenkins globally so that it can interact with our repositories.  
-- Configure Jenkins to use NodeJS so it can build and test our React application.
-- Configure Jenkins with Terraform so it can run `terraform` commands.
-- Configure Jenkins with AWS so it can deploy our application.
+![](readme_images/git_push.png)
 
-Let's dive straight in...
-
-### 1. Generate an access token from GitHub
+## How to generate an access token from GitHub
 
 - Go over to your GitHub and click the dropdown arrow next to your profile picture at the top right. Then click **Settings**
 ![](readme_images/gh.png)
@@ -166,10 +197,30 @@ Let's dive straight in...
 ![](readme_images/user.png)
 ![](readme_images/gen.png)
 - This will take you to a page where your token will be displayed.
-> IMPORTANT: you will only be shown your token once, so copy it by clicking that little clipboard to the right of the token and save it on your machine somewhere. We'll need it for the next part.
+> IMPORTANT: you will only be shown your token once, so copy it by clicking that little clipboard to the right of the token and save it on your machine somewhere. We'll not only need it for the command line authentication, but also for the next section.
 ![](readme_images/token.png)
 
-### 2. Configure GitHub access token gloablly
+Now run the following commands to push up to your master branch.
+```
+git add .
+git commit -m "Populating the Jenkins seed job script"
+git push -u origin master
+```
+And as mentioned before, you can paste your access token straight into the command line when it prompts you for your password.
+
+Now let's move onto section 2...
+
+# Section 2: Configure Jenkins and then build the seed job.
+
+In this section we will:
+- Add our GitHub credentials to Jenkins globally so that it can interact with our repositories.  
+- Configure Jenkins to use NodeJS so it can build and test our React application.
+- Configure Jenkins with Terraform so it can run `terraform` commands.
+- Configure Jenkins with AWS so it can deploy our application.
+
+Let's dive straight in...
+
+### 1. Configure GitHub access token gloablly
 
 Once logged into Jenkins, click...
 - **Manage Jenkins > Manage Credentials**
@@ -212,7 +263,7 @@ All of the plugins for this playground have been pre-installed on your Jenkins s
 ![](readme_images/terraform_installation_details.png)
     - Name: **terraform**
     - Install Automatically: (box checked)
-    - Version: **Terraform 0.13.3 linux (amd64)**
+    - Version: **Terraform 00923 linux (amd64)**
 - Click **Save** which will take you back to the homepage.
 
 ### 4. Configure Jenkins with an AWS region so it knows where to deploy it to. Navigate to:
@@ -225,7 +276,8 @@ All of the plugins for this playground have been pre-installed on your Jenkins s
 
 - Fill in the fields with the following information:
     - Name: **AWS_DEFAULT_REGION**
-    - Value: **eu-west-1**
+    - Value: **eu-west-2**
+
 ![](readme_images/aws_region.png)
 - Click save and we are done with the Jenkins configuration!
 
@@ -240,11 +292,11 @@ This will hold the Groovy code that will build our CI/CD pipeline.
 - Now we need to configure this pipeline:
     - Select **This project is parameterized** and add **TWO** string paramters by clicking **Add Parameter > String Parameter** ![](readme_images/parameterised.png)
     - Add the two variables we saw in Section 1, which were `GIT_USER` and `GIT_URL`. Leave **Default Value** and **Description** blank.
-    - In the **Source Code Management** section, select the **Git** radio button. Fill in **Repository URL** with your forked [react-app-devops-playground](https://github.com/richieganney/react-app-devops-playground) repository and **Credentials** with your credentials that we configured earlier. ![](readme_images/scm.png). Leave the branch as master.
+    - In the **Source Code Management** section, select the **Git** radio button. Fill in **Repository URL** with your forked [react-app-devops-playground](https://github.com/DevOpsPlayground/Hands-on-with-Jenkins-Terraform-and-AWS) repository and **Credentials** with your credentials that we configured earlier. ![](readme_images/scm.png). Leave the branch as master.
     - Lastly, we need to add a build step. In the **Build** section, select **Add build step > Process Job DSLs**. Fill in the **DSL Scripts** section with the file path to our DSL script. The path is `jobs/DeployReactApp.groovy` and it will look like this: ![](readme_images/dsl_build_step.png)
     Click **Save** and the configuration is done!
 
-Before we move onto part three of this section, we need to fork the [react-app-devops-playground](https://github.com/richieganney/react-app-devops-playground) repository, which is the one that holds the application code we need to deploy.
+Before we move onto part three of this section, we need to fork the [react-app-devops-playground](https://github.com/DevOpsPlayground/Hands-on-with-Jenkins-Terraform-and-AWS) repository, which is the one that holds the application code we need to deploy.
 
 So in the same way we forked the Jenkins DSL repository earlier, follow the link above and fork it to your personal GitHub. We will need the URL of this forked repository in just a moment...
 
@@ -256,7 +308,7 @@ Now go back to Jenkins so we can trigger a build to create our CI pipeline.
 ![](readme_images/build_with_params.png)
 - Fill in the fields like so:
     - `GIT_USER`: the username to your personal GitHub
-    - `GIT_URL`: the url of the *forked* [react-app-devops-playground](https://github.com/richieganney/react-app-devops-playground) repository. The image below shows how you can copy the url to your clipboard from the GitHub interface. ![](readme_images/copy_url.png)
+    - `GIT_URL`: the url of the *forked* [react-app-devops-playground](https://github.com/DevOpsPlayground/Hands-on-with-Jenkins-Terraform-and-AWS) repository. The image below shows how you can copy the url to your clipboard from the GitHub interface. ![](readme_images/copy_url.png)
 - Select **Build**
 
 We should have a successful build. The most recent ball under **Build History** should be blue. If you click that ball you'll see the following message in the logs.
@@ -267,20 +319,13 @@ Existing items:
 Finished: SUCCESS
 ```
 
-If you go the Jenkins homepage (you can always do this by clicking the large **Jenkins** icon at the top left of the user interface) you'll see our new pipeline `Deploy-React-App` which will have all the configuration we need. 
+If you go the Jenkins homepage (you can always do this by clicking the large **Jenkins** icon at the top left of the user interface) you'll see our new pipeline `Deploy-React-App` which will have all the configuration we need.
 
-Now all we need to do is populate the `Jenkinsfile` and the `variables.tf` file in the forked [react-app-devops-playground](https://github.com/richieganney/react-app-devops-playground) repository, commit the code, and watch it deploy our application.
+Now all we need to do is populate the `Jenkinsfile` and the `variables.tf` file in the forked [react-app-devops-playground](https://github.com/DevOpsPlayground/Hands-on-with-Jenkins-Terraform-and-AWS) repository, commit the code, and watch it deploy our application.
 
 Onto Section 3...
 
 # Section 3: populate the `Jenkinsfile` and the `variables.tf` file.
-
-Pull down your [forked react repo](https://github.com/richieganney/react-app-devops-playground) to your local machine:
-
-```
-git pull <FORKED_REACT_REPO>
-cd <FORKD_REACT_REPO>
-```
 
 1. Similar to how we populated the Jenkins DSL script, copy the code below paste it into the `Jenkinsfile` located in the root of this directory.
 
@@ -428,15 +473,6 @@ Now that we have pushed the changes, let's go back to Jenkins to see if the **De
 
 You should see the output of all the various stages of our deployment.
 
-### 4. At the bottom, you'll see the following message:
-```
-Application successfully deployed! Please visit http://<ELB_DOMAIN_NAME> in your browser to view it.
-```
-Click the link to see the deployed website!
-> Note: it will take a couple of minutes for the application to deploy, so don't be alarmed if the link isn't working just yet. It will!
-
-AWS lets you utilise resources such as [Amazon Route 53](https://www.google.com/search?q=route+53+aws&oq=route+53+aws&aqs=chrome..69i57j0l5j69i60l2.3169j0j7&sourceid=chrome&ie=UTF-8) to set up domains to your websites. Check out the link above for the documentation.
-
 ### While we wait..
 
 It should be a couple of minutes until the website is live. While we wait, lets go through whats happening from an end to end perspective.
@@ -445,9 +481,21 @@ It should be a couple of minutes until the website is live. While we wait, lets 
 
 1. A build folder is created which packages up our application.
 2. We zip up that folder and send it off to Amazon S3.
-3. When the infrastructure is provisioned, the deployed servers will pull down that build zip file and unzip it.
-4. The build package is ultimately served on port 80 (http://), which allows the public to visit and use the website.
+3. Terraform is initialised and provisions a load balancer and an autoscaling group into a virtual private cloud (VPC)
+4. When the infrastructure is provisioned, the deployed servers will pull down that build zip file and unzip it.
+5. The build package is then ultimately served on port 80 (http://), which allows the public to visit and use the website.
 
 #### Our infrastructure
 - **load balancer**: this will distribute traffic across our servers depending on the health and utilisation of those servers. If one is in poor health, it will redirect traffic to a healthy one.
 - **autoscaling group**: this will automatically scale our application up/down depending on how we configure it. If we have an unexpected surge in traffic, it will provision more servers to make the application more available
+
+### 4. At the bottom of the logs, you'll see the following message:
+```
+Application successfully deployed! Please visit http://<ELB_DOMAIN_NAME> in your browser to view it.
+```
+Click the link to see the deployed website!
+> Note: it will take a couple of minutes for the application to deploy, so don't be alarmed if the link isn't working just yet. It will!
+
+AWS lets you utilise resources such as [Amazon Route 53](https://www.google.com/search?q=route+53+aws&oq=route+53+aws&aqs=chrome..69i57j0l5j69i60l2.3169j0j7&sourceid=chrome&ie=UTF-8) to set up domains to your websites. Check out the link above for the documentation.
+
+Thats all for tonight! Thanks for joining, I hope you enjoyed it!

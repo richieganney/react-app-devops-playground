@@ -1,6 +1,6 @@
 # Create the ELB
 resource "aws_elb" "elb" {
-  name            = var.UNIQUE_ANIMAL_IDENTIFIER
+  name            = "playground-${var.UNIQUE_ANIMAL_IDENTIFIER}"
   security_groups = [var.security_group_id]
   subnets         = [var.subnet_id]
 
@@ -24,6 +24,6 @@ resource "aws_elb" "elb" {
   connection_draining_timeout = 400
 
   tags = {
-    Name = "dpg-november-elb"
+    Name = "playground-${var.UNIQUE_ANIMAL_IDENTIFIER}"
   }
 }

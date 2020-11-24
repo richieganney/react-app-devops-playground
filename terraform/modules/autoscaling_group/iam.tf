@@ -1,15 +1,15 @@
 resource "aws_iam_role" "deploy_role" {
-  name               = "${var.UNIQUE_ANIMAL_IDENTIFIER}-deploy-role"
+  name               = "playground-${var.UNIQUE_ANIMAL_IDENTIFIER}-deploy-role"
   assume_role_policy = file("modules/autoscaling_group/policies/assume_role_policy.json")
 }
 
 resource "aws_iam_instance_profile" "deploy_profile" {
-  name = "${var.UNIQUE_ANIMAL_IDENTIFIER}-deploy-profile"
+  name = "playground-${var.UNIQUE_ANIMAL_IDENTIFIER}-deploy-profile"
   role = aws_iam_role.deploy_role.name
 }
 
 resource "aws_iam_policy" "deploy_policy" {
-  name        = "${var.UNIQUE_ANIMAL_IDENTIFIER}-deploy-policy"
+  name        = "playground-${var.UNIQUE_ANIMAL_IDENTIFIER}-deploy-policy"
   description = "Permissions to deploy application"
   policy      = file("modules/autoscaling_group/policies/deploy_policy.json")
 }
